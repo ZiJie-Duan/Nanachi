@@ -3,42 +3,30 @@ import sys
 from pprint import pprint
 
 from kittens.tui.handler import kitten_ui
-
-def focus(data):
-    """
-    get the tabs and windows
-    lable it as focused or not
-    """
-    windows = {}
-    for tab in data[0]["tabs"]:
-        tab_focused = False
-        if tab['is_focused']:
-            tab_focused = True
-        
-        for window in tab["windows"]:
-            if window["is_focused"]:
-                windows[window["id"]] = {
-                    "window_focused" : True,
-                    "tab_focused" : tab_focused
-                }
-            else:
-                windows[window["id"]] = {
-                    "window_focused" : False,
-                    "tab_focused" : tab_focused
-                }
-    
-    pprint(windows)
-    input()
-
-
+from kittylib import focus
 
 @kitten_ui(allow_remote_control=True)
 def main(args: list[str]) -> str:
+
+    main.remote_control(["set-background-image", "/home/zijie/.config/kitty/Nanachi.png"])
+    
     cp = main.remote_control(["ls"], capture_output=True)
     if cp.returncode != 0:
         sys.stderr.buffer.write(cp.stderr)
         raise SystemExit(cp.returncode)
-    output = json.loads(cp.stdout)
-    pprint(output)
-    focus(output)
+    cp_json = json.loads(cp.stdout)
+
+    pprint(cp_json)
+    windows = focus(cp_json)
+
+    for id in windows:
+        cp = main.remote_control(["get-text", "--match", f"id:{id}", "--extent", "all"],
+                                 capture_output=True)
+        if cp.returncode != 0:
+            sys.stderr.buffer.write(cp.stderr)
+            raise SystemExit(cp.returncode)
+        print(cp.stdout.decode('utf-8'))
+
+    input() 
+    main.remote_control(["set-background-image", "None"])
     return "None"
