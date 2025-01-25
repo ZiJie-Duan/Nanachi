@@ -29,7 +29,6 @@ class Apperance:
         print("Nanachi v0.1")
 
 
-
 def focus(data):
     """
     get a list of windows id

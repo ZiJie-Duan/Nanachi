@@ -1,0 +1,2 @@
+~/.pyenv/versions/3.12.3/bin/python -m pip install --upgrade --target="Nanachi-python/" httpcore
+pyenv install 3.12.3

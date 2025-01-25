@@ -1,8 +1,8 @@
 from openai import OpenAI
 
-class GptApi:
+class DeepSeekApi:
     """
-    GPT API Class
+    DeepSeek API Class
     """
     def __init__(self, api_key: str):
         self.client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
@@ -65,9 +65,4 @@ class GptApi:
                 word = chunk["choices"][0].get("delta", {}).get("content")
                 if word:
                     yield word 
-
-
-    def get_embedding(self, text, model="text-embedding-3-large"):
-        text = text.replace("\n", " ")
-        return self.client.embeddings.create(input = [text], model=model).data[0].embedding
     
