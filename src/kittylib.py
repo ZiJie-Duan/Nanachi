@@ -1,3 +1,34 @@
+import sys
+
+def ctrl_fn_warp(ctrlfn):
+    def warp(*args, **kwargs): 
+        cp = ctrlfn(*args, **kwargs)
+        if cp.returncode != 0:
+            sys.stderr.buffer.write(cp.stderr)
+            raise SystemExit(cp.returncode)
+        else:
+            return cp
+    return warp
+
+
+class Apperance:
+
+    def __init__(self, ctrlfn, image) -> None:
+        self.ctrlfn = ctrlfn
+        self.image = image
+    
+    def set_back_ground(self):
+        self.ctrlfn(["set-background-image", 
+                     self.image])
+    
+    def remove_back_ground(self):
+        self.ctrlfn(["set-background-image", 
+                     "None"])
+    
+    def say_hello(self):
+        print("Nanachi v0.1")
+
+
 
 def focus(data):
     """
