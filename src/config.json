@@ -1,8 +1,8 @@
 {
-    "NANACHI" : {
-        "BG_IMG" : "/home/zijie/.config/kitty/Nanachi.png"
-    },
-    "DEEPSEEK": {
-        "API_KEY": "sk-5aead7e00ca04cb1a9918f723397a53d"
-    }
+  "NANACHI": {
+    "BG_IMG": "/home/zijie/.config/kitty/Nanachi.png"
+  },
+  "DEEPSEEK": {
+    "API_KEY": "sk-a93dcf04a42e4d89bef7301fb6f6ea47"
+  }
 }
