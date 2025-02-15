@@ -38,7 +38,6 @@ from deepseek_api import DeepSeekApi
 from config_json import Config
 from kittylib import focus, Apperance, ctrl_fn_warp
 from decoder import get_history_command
-from api import fetch_backend
 
 def sysinfo():
     # 打印调用该脚本的 Python 解释器路径
@@ -81,32 +80,47 @@ def main(args: list[str]) -> str:
     cp = ctrlfn(["get-text", "--match", f"id:{windows[0]}", "--extent", "all"],
                     capture_output=True)
     
-    raw_text = cp.stdout.decode("utf-8")
-    history = get_history_command(raw_text, "zijie@pop-os:")
-
+    history = get_history_command(cp.stdout.decode("utf-8"), "zijie@pop-os:")
     pprint(history)
     print("\n")
     cp = ctrlfn(["get-text", "--match", f"id:{windows[0]}", "--extent", "last_cmd_output"],
                     capture_output=True)
     lastOutPut = cp.stdout.decode("utf-8")
 
+    message = [{"role": "user", 
+          "content": \
+"这是用户输入命令的历史记录：\n" + "\n".join(history[-10:-1]) +
+"这是用户最后一条命令和输出：\n" + history[-2] + lastOutPut +
+f"""
+请你根据上述的终端历史命令 尤其是最后一条命令和输出 来预测和补全接下来用户会完成的6个最有可能的终端指令
+要完整的终端指令，例如 “ls -l ./server/app/”
+用以下格式输出：
+command1$$$command2$$$command3....
+command是你预测的单条指令，用三个$来分隔命令
+用户已经输入的部分：{history[-1]}
+请你补全指令 写成完整的指令
+"""}]
+    
+    message = [
+        {"role":"user","content":input("qc>>")}
+    ]
+    
+    print(message)
+    print("\n")
 
-    in_line_raw = history[-1].split("#")
-    # 写它！！！ 
-    data = fetch_backend(
-        in_history=raw_text,
-        in_line=in_line_raw[0],
-        in_msg=in_line_raw[1]
-    )
-    commands = data.data["get_command"]["out_lines"]
-    for i, command in enumerate(commands, 1):
-        print(f"{i}. {command}")
- 
+    cmd_list = deepseek.query(
+        message
+    ).split("$$$")
+
+    for i, cmd in enumerate(cmd_list):
+        print(f"{i+1},{cmd}")
+
     uin = input("/n请选择指令编号:")
 
     ctrlfn(["send-text", "--match", f"id:{windows[0]}", "\x15"])
     ap.remove_back_ground()
-    return commands[int(uin)-1]
+    return cmd_list[int(uin)-1]
+
 
 def handle_result(args: list[str], answer: str, target_window_id: int, boss: Boss) -> None:
     # get the kitty window into which to paste answer

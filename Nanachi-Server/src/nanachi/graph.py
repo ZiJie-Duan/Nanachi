@@ -34,7 +34,9 @@ class State(TypedDict):
 
 graph_builder = StateGraph(State)
 
-llm = ChatOpenAI(model="gpt-4o")
+# llm = ChatOpenAI(model="o3-mini", temperature=1)
+
+llm = ChatOpenAI(model="gpt-4o-mini")
 
 def info_summarizer(state: State):
     prompt = f"""以下是 一段终端的 命令行输入和输出
@@ -42,18 +44,25 @@ def info_summarizer(state: State):
     请你根据以上记录 列出重要的信息。重要的，可以从终端记录中得到的信息。
     """
     message = llm.invoke(prompt)
-    return {"bg_info": [message]}
-
-def 
+    return {"bg_info": [message.content]}
 
 def get_command(state: State):
-    prompt = f"""请你根据 背景信息和 用户已经输入的 信息预测可能的命令行
+    prompt = f"""
+    你是一个linux 终端专家
+    请你根据以下提供的背景信息，用户命令行输入，以及用户的要求 预测给出用户需要/想要的命令行
     Background: {state["bg_info"]}
-    User_input: {state["in_line"]}
+    User_Command_Line: {state["in_line"]}
+    User_request: {state["in_msg"]}
     将你的输出用 <<< 和 >>> 包裹，同时将指令用$$$分割开来
-    例如：<<<ls cat$$$cd cat$$$git pull>>>
-    请你预测10个不同的指令
+    如果多条指令作为一批同时运行，请写"\n"换行符在两条指令中间
+    例如：<<<ls cat$$$cd cat$$$git checkout main\ngit pull>>>
+    "ls cat" 为一个批次
+    "git checkout main\ngit pull" 也是一个批次
+    但 "git checkout main" 和 "git pull" 是两条命令作为一个批次运行
+    请你预测五组(五个批次)命令行
     """
+
+    print(prompt)
     message = llm.invoke(prompt)
     commands_str = message.content.split("<<<")[1].split(">>>")[0]
     commands_list = commands_str.split("$$$")
