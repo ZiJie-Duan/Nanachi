@@ -37,7 +37,7 @@ import httpcore
 from deepseek_api import DeepSeekApi
 from config_json import Config
 from kittylib import focus, Apperance, ctrl_fn_warp
-from decoder import get_history_command
+from decoder import get_history_command, get_n_history
 from api import fetch_backend
 
 def sysinfo():
@@ -50,6 +50,35 @@ def sysinfo():
     print("当前 sys.path:", sys.path)
     print("httpcore 是否存在:", os.path.exists(os.path.join(custom_lib, "httpcore")))
 
+def color_print(text, color):
+    """
+    打印带颜色的文本
+    
+    参数:
+        text: 要打印的文本
+        color: 颜色代码，可以是以下值:
+            'red': 红色
+            'green': 绿色
+            'yellow': 黄色
+            'blue': 蓝色
+            'purple': 紫色
+            'cyan': 青色
+    """
+    color_codes = {
+        'red': '\033[91m',
+        'green': '\033[92m', 
+        'yellow': '\033[93m',
+        'blue': '\033[94m',
+        'purple': '\033[95m',
+        'cyan': '\033[96m'
+    }
+    end_code = '\033[0m'
+    
+    if color in color_codes:
+        print(f"{color_codes[color]}{text}{end_code}")
+    else:
+        print(text)
+
 
 @kitten_ui(allow_remote_control=True)
 def main(args: list[str]) -> str:
@@ -57,7 +86,7 @@ def main(args: list[str]) -> str:
     cfg = Config("/home/zijie/Nanachi/src/config.json") 
     ctrlfn = ctrl_fn_warp(main.remote_control)
     ap = Apperance(ctrlfn, cfg("NANACHI_BG_IMG"))
-    deepseek = DeepSeekApi(api_key=cfg("DEEPSEEK_API_KEY"))
+    #deepseek = DeepSeekApi(api_key=cfg("DEEPSEEK_API_KEY"))
 
     def handle_exit(signal_number, frame):
         ap.remove_back_ground()        
@@ -84,25 +113,33 @@ def main(args: list[str]) -> str:
     raw_text = cp.stdout.decode("utf-8")
     history = get_history_command(raw_text, "zijie@pop-os:")
 
-    pprint(history)
+    #pprint(history)
     print("\n")
     cp = ctrlfn(["get-text", "--match", f"id:{windows[0]}", "--extent", "last_cmd_output"],
                     capture_output=True)
     lastOutPut = cp.stdout.decode("utf-8")
 
+    if "#" in history[-1]:
+        in_line_raw = history[-1].split("#")
+    else:
+        in_line_raw = [history[-1],"Complete command"]
 
-    in_line_raw = history[-1].split("#")
+    color_print(get_n_history(raw_text,"zijie@pop-os:", 5),"yellow")
     # 写它！！！ 
     data = fetch_backend(
-        in_history=raw_text,
+        in_history=get_n_history(raw_text,"zijie@pop-os:", 5),
         in_line=in_line_raw[0],
         in_msg=in_line_raw[1]
     )
-    commands = data.data["get_command"]["out_lines"]
+    commands = data
+    #commands = data.data["get_command"]["out_lines"]
     for i, command in enumerate(commands, 1):
         print(f"{i}. {command}")
  
-    uin = input("/n请选择指令编号:")
+    uin = input("/n请选择指令编号(q退出):")
+    if uin == "q":
+        ap.remove_back_ground()
+        return None
 
     ctrlfn(["send-text", "--match", f"id:{windows[0]}", "\x15"])
     ap.remove_back_ground()

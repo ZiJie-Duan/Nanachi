@@ -171,3 +171,5 @@ cython_debug/
 .pypirc
 
 config.*
+src/config.*
+src/config.json
