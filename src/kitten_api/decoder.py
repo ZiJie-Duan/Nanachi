@@ -18,5 +18,5 @@ def get_n_history(text, prefix, n):
     parts = [x for x in parts if not (x.endswith("$ \n") \
                                 or x.endswith("$ \n\n") \
                                 or x.endswith("$ \n\n\n"))]
-    parts = parts[len(parts)-n:len(parts)]
+    parts = parts[max(len(parts)-n,0):len(parts)]
     return prefix + prefix.join(parts)

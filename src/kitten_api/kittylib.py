@@ -24,9 +24,7 @@ class Apperance:
     
     def say_hello(self):
         print("Nanachi v0.1")
-        print("啊呀，上层来的人类呀……\n呐拥抱黑暗吧……\n你从终端深渊召唤了咱，我娜娜奇，来帮帮你吧……")
-        print("\n\n")
-
+        print("啊呀，上层来的人类呀……\n呐拥抱黑暗吧……\n你从终端深渊召唤了咱，我娜娜奇，来帮帮你吧……\n")
 
 class KittenDriver:
 
@@ -88,7 +86,7 @@ class KittenDriver:
         return windows_id
 
 
-    def color_print(self, text, color):
+    def color_print(self, text, color = "None"):
         """
         打印带颜色的文本
         
