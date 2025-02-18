@@ -127,7 +127,6 @@ def main(args: list[str]) -> str:
         uin = ul[0]
         commands_temp = [commands[x-1] for x in ul]
         bash_history_injection("\n".join(commands_temp))
-        commands[int(uin)-1] = "bash"
 
     kd.clean_in_line()
     ap.remove_back_ground()
